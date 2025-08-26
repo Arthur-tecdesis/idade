@@ -48,20 +48,25 @@ class IdadeApp(App):
         )
         layout.add_widget(self.campo_idade)
         
-        # Botão de verificação (AGORA BRANCO)
+        # Botão de verificação
         botao = Button(
             text="Verificar Idade", 
             size_hint=(1, None), 
             height=50,
-            background_color=COR_BOTAO,  # Botão branco
-            color=COR_FUNDO,             # Texto do botão na cor de fundo
+            background_color=COR_BOTAO,
+            background_normal='',  # Remove o estilo padrão para garantir a cor branca
+            color=COR_FUNDO,
             bold=True
         )
         botao.bind(on_press=self.verificar_idade)
         layout.add_widget(botao)
         
+        # Label para mensagens de erro (inicialmente vazia)
+        self.label_erro = Label(text="", color=(1, 1, 1, 1), font_size=16)  # Branco
+        layout.add_widget(self.label_erro)
+        
         # Resultado
-        self.label_resultado = Label(text="Preencha seus dados acima", color=COR_TEXTO, font_size=20)
+        self.label_resultado = Label(text="", color=COR_TEXTO, font_size=20)
         layout.add_widget(self.label_resultado)
         
         return layout
@@ -71,25 +76,46 @@ class IdadeApp(App):
         self.rect.pos = instance.pos
 
     def verificar_idade(self, instance):
+        # Limpa mensagens anteriores
+        self.label_erro.text = ""
+        self.label_resultado.text = ""
+        
         nome = self.campo_nome.text.strip()
         idade_txt = self.campo_idade.text.strip()
         
+        # Validação do nome
         if not nome:
-            self.label_resultado.text = "Digite seu nome!"
+            self.label_erro.text = "Por favor, digite seu nome."
             return
-        
+            
+        # Verifica se o nome contém apenas números
+        if nome.isdigit():
+            self.label_erro.text = "Por favor, digite um nome válido (não apenas números)."
+            return
+            
+        # Validação da idade
         if not idade_txt:
-            self.label_resultado.text = "Digite uma idade válida!"
+            self.label_erro.text = "Por favor, digite sua idade."
+            return
+            
+        try:
+            idade = int(idade_txt)
+        except ValueError:
+            self.label_erro.text = "Por favor, digite uma idade válida (apenas números)."
+            return
+            
+        # Verifica se a idade é um valor razoável
+        if idade < 0 or idade > 120:
+            self.label_erro.text = "Por favor, digite uma idade entre 0 e 120 anos."
             return
         
-        idade = int(idade_txt)
-        
+        # Exibe o resultado baseado na idade
         if idade < 18:
-            self.label_resultado.text = f"Olá, {nome}! Você ainda é de menor então não ta podendo."
+            self.label_resultado.text = f"Olá, {nome}! Você é menor de idade."
         elif idade < 60:
-            self.label_resultado.text = f"Olá, {nome}! Você já é de maior então já ta podendo."
+            self.label_resultado.text = f"Olá, {nome}! Você é maior de idade."
         else:
-            self.label_resultado.text = f"Olá, {nome}! ta ficando velho em irmão ta precisando tomar omega três 😁👍."
+            self.label_resultado.text = f"Olá, {nome}! Você já é uma pessoa de idade é merece muito respeito ❤️."
 
 if __name__ == '__main__':
     IdadeApp().run()
